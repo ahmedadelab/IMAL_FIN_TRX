@@ -13,5 +13,8 @@
         public string? UserID { get; set; }
         public string? Password { get; set; }
         public string? ChannelName { get; set; }
+
+        public string? TransferDesc { get; set; }
+
     }
 }

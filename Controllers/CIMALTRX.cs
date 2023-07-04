@@ -10,7 +10,7 @@ namespace IMAL_FIN_TRX.Controllers
         [HttpPost("CIMALTRX")]
         public ActionResult<string> Create([FromBody] SIMALTRX x)
         {
-            return (dllCode.CreatTrx(x.TransactionType,x.ToAdditionalRef,x.fromAdditionalRef,x.TransactionPurpose,x.TransactionAmount,x.Currency,x.TransactionDate,x.ValueDate,x.UserID,x.Password,x.ChannelName));
+            return (dllCode.CreatTrx(x.TransactionType,x.ToAdditionalRef,x.fromAdditionalRef,x.TransactionPurpose,x.TransactionAmount,x.Currency,x.TransactionDate,x.ValueDate,x.UserID,x.Password,x.ChannelName,x.TransferDesc));
         }
     }
 }
