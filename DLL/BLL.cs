@@ -215,7 +215,7 @@ namespace IMAL_FIN_TRX.DLL
 
 
                     StatusCode = "-999",
-                    StatusDesc = ex.Message,
+                    StatusDesc = "Techical Error "+"\n"+ex.Message+"\n"+ex.InnerException,
 
                 });
 
