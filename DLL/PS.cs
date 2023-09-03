@@ -5,7 +5,9 @@
         public class RespCreateTransfer
         {
 
+            public string? branchCode { get; set; }
 
+            public string? transactionNumber { get; set; }
             public string? StatusCode { get; set; }
             public string? StatusDesc { get; set; }
 

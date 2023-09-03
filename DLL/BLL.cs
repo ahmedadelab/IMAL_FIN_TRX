@@ -91,7 +91,7 @@ namespace IMAL_FIN_TRX.DLL
          <branchCode>5599</branchCode>
          <transactionType>" + TransactionType + @"</transactionType>         
          <fromAccount>
-         		<additionalRef>" + fromAdditionalRef + @"</additionalRef>
+       <additionalRef>" + fromAdditionalRef + @"</additionalRef>
          </fromAccount>         
          <toAccounts>
          		<multiAccount>
@@ -106,11 +106,12 @@ namespace IMAL_FIN_TRX.DLL
          <transactionDate>" + TransactionDate + @"</transactionDate>  
          <dofDescription>"+TransferDesc +@"</dofDescription>
          <valueDate>" + valueDate + @"</valueDate>   
+         <transactionStatus>1</transactionStatus>
          <useDate>0</useDate>          
          <useAccount>1</useAccount> 
         <requestContext>
-           <requestID>" + RequestID + @"</requestID>
-           <coreRequestTimeStamp>" + requesterTimeStamp + @"</coreRequestTimeStamp>
+        <coreRequestTimeStamp> " + requesterTimeStamp + @"</coreRequestTimeStamp>
+         <requestID>" + RequestID + @"</requestID>
          </requestContext>         
          <requesterContext>
          		<channelID>1</channelID>
@@ -155,14 +156,20 @@ namespace IMAL_FIN_TRX.DLL
                             if (StatusCode == "0")
                             {
 
+                                XmlNodeList elemtransactionNumber = xmlDoc.GetElementsByTagName("transactionNumber");
+                          string transactionNumber = elemtransactionNumber[0].InnerXml;
+
+                                XmlNodeList elembranchCode = xmlDoc.GetElementsByTagName("branchCode");
+                                string branchCode = elembranchCode[0].InnerXml;
 
                                 logresponse.Add(new RespCreateTransfer
                                 {
-
+                                    transactionNumber = transactionNumber,
+                                    branchCode = branchCode,
                                     StatusCode = StatusCode,
                                     StatusDesc = StatusDesc,
 
-                                });
+                                }) ;
                             }
                             else
                             {
