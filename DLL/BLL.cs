@@ -39,7 +39,187 @@ namespace IMAL_FIN_TRX.DLL
             return statusChannel;
         }
 
+        public string ReverseTrx(string BrancheCode, string TransactionNumber, string reason, string userID, string password, string ChannelName)
+        {
+            string soapResult = string.Empty;
+            string StatusDesc = string.Empty;
+            string StatusCode = string.Empty;
+            string transactionNum = string.Empty;
+            string branchcode = string.Empty;
+            List<ReqReverseTransaction> logrequest1 = new List<ReqReverseTransaction>();
+            List<RespReverseTransaction> logresponse1 = new List<RespReverseTransaction>();
+            string RequestID = "MW-RVRX-" + TransactionNumber+"-"+"-"+ BrancheCode + DateTime.Now.ToString("ddMMyyyyHHmmssff");
+            string requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
+            try
+            {
+                logrequest1.Add(new ReqReverseTransaction
+                {
+                    branchCode = BrancheCode,
+                    transactionNumber = TransactionNumber,
+                    reason = reason,
+                    UserID = userID,
+                    Password = "******",
+                    ChannelName = ChannelName
+                });
+                string ClientRequest = JsonConvert.SerializeObject(logrequest1, Newtonsoft.Json.Formatting.Indented);
+                DalCode.InsertLog("TRXReverse", Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")), ClientRequest, "Pending", ChannelName, RequestID);
+                string status = CheckChannel(ChannelName, userID, "TRXReverse");
+                if (status == "Enabled")
+                {
+                    HttpWebRequest request = HTTPS.CreateWebReverseTransaction();
+                    XmlDocument soapEnvelopeXml = new XmlDocument();
+                    soapEnvelopeXml.LoadXml(@"<soapenv:Envelope xmlns:soapenv=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:tran=""transactionWs"">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tran:approveReverseTransaction>
+         <serviceContext>
+            <businessArea>Retail</businessArea>
+            <businessDomain>PaymentsOperationsManagement</businessDomain>
+            <operationName>approveReverseTransaction</operationName>
+            <serviceDomain>Transaction</serviceDomain>
+            <serviceID>5807</serviceID>
+            <version>1.0</version>
+         </serviceContext>
+         <companyCode>1</companyCode>
+         <branchCode>" + BrancheCode + @"</branchCode>
+         <transactionNumber>" + TransactionNumber + @"</transactionNumber>
+         <reason>" + reason + @"</reason>
+         <requestContext>
+            <coreRequestTimeStamp>" + requesterTimeStamp + @"</coreRequestTimeStamp>
+            <requestID>" + RequestID + @"</requestID>
+         </requestContext>
+         <requesterContext>
+           <channelID>1</channelID>
+           <hashKey>1</hashKey>
+           <langId>EN</langId>
+           <password>" + password + @"</password>
+           <requesterTimeStamp>" + requesterTimeStamp + @"</requesterTimeStamp>
+           <userID>" + userID + @"</userID>
+         </requesterContext>
+         <vendorContext>
+            <license>Copyright 2018 Path Solutions. All Rights Reserved</license>
+            <providerCompanyName>Path Solutions</providerCompanyName>
+            <providerID>IMAL</providerID>
+         </vendorContext>
+      </tran:approveReverseTransaction>
+   </soapenv:Body>
+</soapenv:Envelope>
+");
 
+                    using (Stream stream = request.GetRequestStream())
+                    {
+                        soapEnvelopeXml.Save(stream);
+                    }
+
+
+                    using (WebResponse response = request.GetResponse())
+                    {
+
+                        using (StreamReader rd = new StreamReader(response.GetResponseStream()))
+                        {
+                            soapResult = rd.ReadToEnd();
+                            //Console.WriteLine(soapResult);
+                            var str = XElement.Parse(soapResult);
+                            XmlDocument xmlDoc = new XmlDocument();
+                            xmlDoc.LoadXml(soapResult);
+                            XmlNodeList elemStatusCode = xmlDoc.GetElementsByTagName("statusCode");
+                            StatusCode = elemStatusCode[0]?.InnerXml;
+                            XmlNodeList elemStatusCodeDes = xmlDoc.GetElementsByTagName("statusDesc");
+                            StatusDesc = elemStatusCodeDes[0]?.InnerXml;
+
+                            XmlNodeList elemtransactionNumber = xmlDoc.GetElementsByTagName("transactionNumber");
+
+                            transactionNum = elemtransactionNumber[0]?.InnerXml;
+
+
+                            XmlNodeList elembranchcode = xmlDoc.GetElementsByTagName("branchCode");
+
+                            branchcode = elemtransactionNumber[0]?.InnerXml;
+                            if (StatusCode == "0")
+                            {
+
+                                elemtransactionNumber = xmlDoc.GetElementsByTagName("transactionNumber");
+                                transactionNum = elemtransactionNumber[0]?.InnerXml;
+
+                                XmlNodeList elembranchCode = xmlDoc.GetElementsByTagName("branchCode");
+                                string branchCode = elembranchCode[0].InnerXml;
+
+                                logresponse1.Add(new RespReverseTransaction
+                                {
+                                    transactionNumber = transactionNum,
+                                    branchCode = branchCode,
+                                    StatusCode = StatusCode,
+                                    StatusDesc = StatusDesc,
+
+                                });
+                            }
+                            else
+                            { 
+                                if(StatusCode == null)
+                                {
+                                    XmlNodeList elemerrorCode = xmlDoc.GetElementsByTagName("errorCode");
+                                    StatusCode = elemerrorCode[0]?.InnerXml;
+                                    XmlNodeList elemerrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
+                                    StatusDesc = elemerrorDesc[0]?.InnerXml;
+                                }
+                                logresponse1.Add(new RespReverseTransaction
+                                {
+                                    branchCode = BrancheCode,
+                                    transactionNumber = TransactionNumber,
+                                    StatusCode = StatusCode,
+                                    StatusDesc = StatusDesc,
+
+
+                                });
+                            }
+
+
+                        }
+
+                    }
+
+                }
+                else
+                {
+                    logresponse1.Add(new RespReverseTransaction
+                    {
+
+
+                        StatusCode = "-998",
+                        StatusDesc = "Channel Not Authorized",
+
+                    });
+                }
+
+                string statuslog = "";
+                if (StatusCode == "0")
+                {
+                    statuslog = "Success";
+                }
+                else
+                {
+                    statuslog = "Failed";
+                }
+                DalCode.UpdateLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), JsonConvert.SerializeObject(logresponse1, Newtonsoft.Json.Formatting.Indented), statuslog, ChannelName, RequestID);
+
+
+
+            }
+            catch (Exception ex)
+            {
+                logresponse1.Add(new RespReverseTransaction
+                {
+
+
+                    StatusCode = "-999",
+                    StatusDesc = "Techical Error " + "\n" + ex.Message + "\n" + ex.InnerException,
+
+                });
+
+            }
+            return JsonConvert.SerializeObject(logresponse1, Newtonsoft.Json.Formatting.Indented);
+
+        }
 
 
         public string CreatTrx(string TransactionType, string ToAdditionalRef, string fromAdditionalRef, string TransactionPurpose, string TransactionAmount, string Currency, string TransactionDate,
@@ -89,7 +269,6 @@ namespace IMAL_FIN_TRX.DLL
          </serviceContext>       
          <companyCode>1</companyCode>
          <branchCode>5599</branchCode>
-         <transactionType>" + TransactionType + @"</transactionType>         
          <fromAccount>
        <additionalRef>" + fromAdditionalRef + @"</additionalRef>
          </fromAccount>         
@@ -223,6 +402,205 @@ namespace IMAL_FIN_TRX.DLL
 
                     StatusCode = "-999",
                     StatusDesc = "Techical Error "+"\n"+ex.Message+"\n"+ex.InnerException,
+
+                });
+
+            }
+            return JsonConvert.SerializeObject(logresponse, Newtonsoft.Json.Formatting.Indented);
+
+        }
+
+        public string CreatTrxCharge(string TransactionType, string ToAdditionalRef, string fromAdditionalRef, string TransactionPurpose, string TransactionAmount, string Currency, string TransactionDate,
+          string valueDate, string userID, string password, string ChannelName, string TransferDesc,string ChargeCode1,string ChargeCodeAmount1,string ChargeCode2,string ChargeCodeAmount2)
+        {
+            string soapResult = string.Empty;
+            string StatusDesc = string.Empty;
+            string StatusCode = string.Empty;
+            List<ReqCreateTransfer> logrequest = new List<ReqCreateTransfer>();
+            List<RespCreateTransfer> logresponse = new List<RespCreateTransfer>();
+            string RequestID = "MW-CTRXCharge-" + TransactionType + "-" + DateTime.Now.ToString("ddMMyyyyHHmmssff");
+            string requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
+            try
+            {
+                logrequest.Add(new ReqCreateTransfer
+                {
+                    TransactionType = TransactionType,
+                    ToAdditionalRef = ToAdditionalRef,
+                    fromAdditionalRef = fromAdditionalRef,
+                    TransactionPurpose = TransactionPurpose,
+                    TransactionAmount = TransactionAmount,
+                    Currency = Currency,
+                    TransactionDate = TransactionDate,
+                    ValueDate = valueDate,
+                    UserID = userID,
+                    Password = "******",
+                    ChannelName = ChannelName
+                });
+                string ClientRequest = JsonConvert.SerializeObject(logrequest, Newtonsoft.Json.Formatting.Indented);
+                DalCode.InsertLog("TRXTransferCharge", Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")), ClientRequest, "Pending", ChannelName, RequestID);
+                string status = CheckChannel(ChannelName, userID, "TRXTransferCharge");
+                if (status == "Enabled")
+                {
+                    HttpWebRequest request = HTTPS.CreateWebRequestTransfer();
+                    XmlDocument soapEnvelopeXml = new XmlDocument();
+                    soapEnvelopeXml.LoadXml(@"<soapenv:Envelope xmlns:soapenv=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:tran=""transferWs"">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tran:createTransfer>
+           <serviceContext>
+            <businessArea>Retail</businessArea>
+            <businessDomain>PaymentsOperationsManagement</businessDomain>
+            <operationName>createTransfer</operationName>
+            <serviceDomain>Transfer</serviceDomain>
+            <serviceID>4801</serviceID>
+            <version>1.0</version>
+         </serviceContext>      
+         <companyCode>1</companyCode>
+         <branchCode>5599</branchCode>
+         <transactionType>"+ TransactionType +@"</transactionType>
+         <fromAccount>
+       <additionalRef>" + fromAdditionalRef + @"</additionalRef>
+         </fromAccount>         
+         <toAccounts>
+         		<multiAccount>
+         			<account>
+         				<additionalRef>" + ToAdditionalRef + @"</additionalRef>
+         			</account>
+         		</multiAccount>
+         </toAccounts>   
+         <chargesList>
+           <charges>
+            <chargeCode>" + ChargeCode1 +@"</chargeCode>
+            <newAmount>" + ChargeCodeAmount1 + @"</newAmount>
+            </charges>                
+           <charges>
+             <chargeCode>" + ChargeCode2 +@"</chargeCode>
+            <newAmount>" + ChargeCodeAmount2 + @"</newAmount>
+           </charges>
+         </chargesList>
+         <transactionPurpose>" + TransactionPurpose + @"</transactionPurpose>
+         <transactionAmount>" + TransactionAmount + @"</transactionAmount>
+         <currencyIso>" + Currency + @"</currencyIso> 
+         <transactionDate>" + TransactionDate + @"</transactionDate>  
+         <dofDescription>" + TransferDesc + @"</dofDescription>
+         <valueDate>" + valueDate + @"</valueDate>   
+         <transactionStatus>1</transactionStatus>
+         <useDate>0</useDate>          
+         <useAccount>1</useAccount> 
+        <requestContext>
+        <coreRequestTimeStamp> " + requesterTimeStamp + @"</coreRequestTimeStamp>
+         <requestID>" + RequestID + @"</requestID>
+         </requestContext>         
+         <requesterContext>
+         		<channelID>1</channelID>
+         		<hashKey>1</hashKey>
+         		<langId>EN</langId>
+         		<password>" + password + @"</password>
+         		<requesterTimeStamp>" + requesterTimeStamp + @"</requesterTimeStamp>
+         		<userID>" + userID + @"</userID>
+         </requesterContext>
+         <vendorContext>
+            <license>Copyright 2018 Path Solutions. All Rights Reserved</license>
+            <providerCompanyName>Path Solutions</providerCompanyName>
+            <providerID>IMAL</providerID>
+         </vendorContext>
+      </tran:createTransfer>
+   </soapenv:Body>
+</soapenv:Envelope>
+");
+
+                    using (Stream stream = request.GetRequestStream())
+                    {
+                        soapEnvelopeXml.Save(stream);
+                    }
+
+
+                    using (WebResponse response = request.GetResponse())
+                    {
+
+                        using (StreamReader rd = new StreamReader(response.GetResponseStream()))
+                        {
+                            soapResult = rd.ReadToEnd();
+                            //Console.WriteLine(soapResult);
+                            var str = XElement.Parse(soapResult);
+                            XmlDocument xmlDoc = new XmlDocument();
+                            xmlDoc.LoadXml(soapResult);
+                            XmlNodeList elemStatusCode = xmlDoc.GetElementsByTagName("statusCode");
+                            StatusCode = elemStatusCode[0].InnerXml;
+                            XmlNodeList elemStatusCodeDes = xmlDoc.GetElementsByTagName("statusDesc");
+                            StatusDesc = elemStatusCodeDes[0].InnerXml;
+
+
+                            if (StatusCode == "0")
+                            {
+
+                                XmlNodeList elemtransactionNumber = xmlDoc.GetElementsByTagName("transactionNumber");
+                                string transactionNumber = elemtransactionNumber[0].InnerXml;
+
+                                XmlNodeList elembranchCode = xmlDoc.GetElementsByTagName("branchCode");
+                                string branchCode = elembranchCode[0].InnerXml;
+
+                                logresponse.Add(new RespCreateTransfer
+                                {
+                                    transactionNumber = transactionNumber,
+                                    branchCode = branchCode,
+                                    StatusCode = StatusCode,
+                                    StatusDesc = StatusDesc,
+
+                                });
+                            }
+                            else
+                            {
+                                logresponse.Add(new RespCreateTransfer
+                                {
+
+
+                                    StatusCode = StatusCode,
+                                    StatusDesc = StatusDesc,
+
+                                });
+                            }
+
+
+                        }
+
+                    }
+
+                }
+                else
+                {
+                    logresponse.Add(new RespCreateTransfer
+                    {
+
+
+                        StatusCode = "-998",
+                        StatusDesc = "Channel Not Authorized",
+
+                    });
+                }
+
+                string statuslog = "";
+                if (StatusCode == "0")
+                {
+                    statuslog = "Success";
+                }
+                else
+                {
+                    statuslog = "Failed";
+                }
+                DalCode.UpdateLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), JsonConvert.SerializeObject(logresponse, Newtonsoft.Json.Formatting.Indented), statuslog, ChannelName, RequestID);
+
+
+
+            }
+            catch (Exception ex)
+            {
+                logresponse.Add(new RespCreateTransfer
+                {
+
+
+                    StatusCode = "-999",
+                    StatusDesc = "Techical Error " + "\n" + ex.Message + "\n" + ex.InnerException,
 
                 });
 
