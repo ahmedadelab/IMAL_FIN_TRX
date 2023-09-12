@@ -269,6 +269,7 @@ namespace IMAL_FIN_TRX.DLL
          </serviceContext>       
          <companyCode>1</companyCode>
          <branchCode>5599</branchCode>
+        <transactionType>"+TransactionType+@"</transactionType>
          <fromAccount>
        <additionalRef>" + fromAdditionalRef + @"</additionalRef>
          </fromAccount>         
@@ -279,14 +280,14 @@ namespace IMAL_FIN_TRX.DLL
          			</account>
          		</multiAccount>
          </toAccounts>        
-         <transactionPurpose>" + TransactionPurpose + @"</transactionPurpose>
+        <transactionPurpose>" + TransactionPurpose + @"</transactionPurpose>
          <transactionAmount>" + TransactionAmount + @"</transactionAmount>
          <currencyIso>" + Currency + @"</currencyIso> 
          <transactionDate>" + TransactionDate + @"</transactionDate>  
          <dofDescription>"+TransferDesc +@"</dofDescription>
          <valueDate>" + valueDate + @"</valueDate>   
          <transactionStatus>1</transactionStatus>
-         <useDate>0</useDate>          
+         <useDate>0</useDate>  
          <useAccount>1</useAccount> 
         <requestContext>
         <coreRequestTimeStamp> " + requesterTimeStamp + @"</coreRequestTimeStamp>
@@ -327,9 +328,9 @@ namespace IMAL_FIN_TRX.DLL
                             XmlDocument xmlDoc = new XmlDocument();
                             xmlDoc.LoadXml(soapResult);
                             XmlNodeList elemStatusCode = xmlDoc.GetElementsByTagName("statusCode");
-                            StatusCode = elemStatusCode[0].InnerXml;
+                            StatusCode = elemStatusCode[0]?.InnerXml;
                             XmlNodeList elemStatusCodeDes = xmlDoc.GetElementsByTagName("statusDesc");
-                            StatusDesc = elemStatusCodeDes[0].InnerXml;
+                            StatusDesc = elemStatusCodeDes[0]?.InnerXml;
 
 
                             if (StatusCode == "0")
@@ -352,6 +353,13 @@ namespace IMAL_FIN_TRX.DLL
                             }
                             else
                             {
+                                if(StatusCode == null)
+                                {
+                                    XmlNodeList elemerrorCode = xmlDoc.GetElementsByTagName("errorCode");
+                                    StatusCode = elemerrorCode[0]?.InnerXml;
+                                    XmlNodeList elemerrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
+                                    StatusDesc = elemerrorDesc[0]?.InnerXml;
+                                }
                                 logresponse.Add(new RespCreateTransfer
                                 {
 
@@ -430,6 +438,10 @@ namespace IMAL_FIN_TRX.DLL
                     TransactionPurpose = TransactionPurpose,
                     TransactionAmount = TransactionAmount,
                     Currency = Currency,
+                    ChargeCode1 = ChargeCode1,
+                    ChargeCodeAmount1 = ChargeCodeAmount1,
+                    ChargeCode2 = ChargeCode2,
+                    ChargeCodeAmount2 = ChargeCodeAmount2,
                     TransactionDate = TransactionDate,
                     ValueDate = valueDate,
                     UserID = userID,
@@ -473,10 +485,10 @@ namespace IMAL_FIN_TRX.DLL
             <chargeCode>" + ChargeCode1 +@"</chargeCode>
             <newAmount>" + ChargeCodeAmount1 + @"</newAmount>
             </charges>                
-           <charges>
+        <!--   <charges>
              <chargeCode>" + ChargeCode2 +@"</chargeCode>
             <newAmount>" + ChargeCodeAmount2 + @"</newAmount>
-           </charges>
+           </charges> -->
          </chargesList>
          <transactionPurpose>" + TransactionPurpose + @"</transactionPurpose>
          <transactionAmount>" + TransactionAmount + @"</transactionAmount>
@@ -526,9 +538,9 @@ namespace IMAL_FIN_TRX.DLL
                             XmlDocument xmlDoc = new XmlDocument();
                             xmlDoc.LoadXml(soapResult);
                             XmlNodeList elemStatusCode = xmlDoc.GetElementsByTagName("statusCode");
-                            StatusCode = elemStatusCode[0].InnerXml;
+                            StatusCode = elemStatusCode[0]?.InnerXml;
                             XmlNodeList elemStatusCodeDes = xmlDoc.GetElementsByTagName("statusDesc");
-                            StatusDesc = elemStatusCodeDes[0].InnerXml;
+                            StatusDesc = elemStatusCodeDes[0]?.InnerXml;
 
 
                             if (StatusCode == "0")
@@ -551,6 +563,13 @@ namespace IMAL_FIN_TRX.DLL
                             }
                             else
                             {
+                                if (StatusCode == null)
+                                {
+                                    XmlNodeList elemerrorCode = xmlDoc.GetElementsByTagName("errorCode");
+                                    StatusCode = elemerrorCode[0]?.InnerXml;
+                                    XmlNodeList elemerrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
+                                    StatusDesc = elemerrorDesc[0]?.InnerXml;
+                                }
                                 logresponse.Add(new RespCreateTransfer
                                 {
 
