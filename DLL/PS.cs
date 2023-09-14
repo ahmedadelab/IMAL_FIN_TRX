@@ -11,6 +11,7 @@
             public string? StatusCode { get; set; }
             public string? StatusDesc { get; set; }
 
+            public string? IMALRequestID { get; set; }
         }
         public class ReqReverseTransaction
         {

@@ -348,6 +348,7 @@ namespace IMAL_FIN_TRX.DLL
                                     branchCode = branchCode,
                                     StatusCode = StatusCode,
                                     StatusDesc = StatusDesc,
+                                    IMALRequestID = RequestID
 
                                 }) ;
                             }
@@ -366,6 +367,7 @@ namespace IMAL_FIN_TRX.DLL
 
                                     StatusCode = StatusCode,
                                     StatusDesc = StatusDesc,
+                                    IMALRequestID = RequestID
 
                                 });
                             }
@@ -558,6 +560,7 @@ namespace IMAL_FIN_TRX.DLL
                                     branchCode = branchCode,
                                     StatusCode = StatusCode,
                                     StatusDesc = StatusDesc,
+                                    IMALRequestID = RequestID
 
                                 });
                             }
@@ -576,6 +579,7 @@ namespace IMAL_FIN_TRX.DLL
 
                                     StatusCode = StatusCode,
                                     StatusDesc = StatusDesc,
+                                    IMALRequestID = RequestID
 
                                 });
                             }
