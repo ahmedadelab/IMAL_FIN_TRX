@@ -487,10 +487,10 @@ namespace IMAL_FIN_TRX.DLL
             <chargeCode>" + ChargeCode1 +@"</chargeCode>
             <newAmount>" + ChargeCodeAmount1 + @"</newAmount>
             </charges>                
-        <!--   <charges>
+          <charges>
              <chargeCode>" + ChargeCode2 +@"</chargeCode>
             <newAmount>" + ChargeCodeAmount2 + @"</newAmount>
-           </charges> -->
+           </charges> 
          </chargesList>
          <transactionPurpose>" + TransactionPurpose + @"</transactionPurpose>
          <transactionAmount>" + TransactionAmount + @"</transactionAmount>
