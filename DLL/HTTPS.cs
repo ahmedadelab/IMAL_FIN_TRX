@@ -18,6 +18,19 @@ namespace IMAL_FIN_TRX.DLL
             return webRequest;
         }
 
+        public static HttpWebRequest CreateChequeTransaction()
+        {
+            var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            var ChequeTransaction = MyConfig.GetValue<string>("AppSettings:ChequeTransaction");
+            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(ChequeTransaction);
+            webRequest.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+            webRequest.Headers.Add(@"SOAP:Action");
+            webRequest.ContentType = "text/xml;charset=\"utf-8\"";
+            webRequest.Accept = "text/xml";
+            webRequest.Method = "POST";
+            return webRequest;
+        }
+
         public static HttpWebRequest CreateWebReverseTransaction()
         {
             var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();

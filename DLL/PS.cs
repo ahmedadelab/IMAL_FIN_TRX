@@ -13,6 +13,34 @@
 
             public string? IMALRequestID { get; set; }
         }
+
+        public class ChequeReq
+        {
+            public string? transactionType { get; set; }
+            public string? CreditAdditionalRef { get; set; }
+            public string? DebitAdditionalRef { get; set; }
+            public string? transactionAmount { get; set; }
+            public string? currencyIso { get; set; }
+            public string? chequeNumber { get; set; }
+            public string? chequeDate { get; set; }
+            public string? useDate { get; set; }
+            public string? transactionDate { get; set; }
+            public string? valueDate { get; set; }
+            public string? transactionStatus { get; set; }
+            public string? UserID { get; set; }
+            public string? Password { get; set; }
+            public string? ChannelName { get; set; }
+        }
+        public class ChequeRes
+        {
+            public string? TRXno { get; set; }
+
+            public string? BranchNo { get; set; }
+
+            public string? statusDesc { get; set; }
+            public string? statusCode { get; set; }
+
+        }
         public class ReqReverseTransaction
         {
             public string? branchCode { get; set; }

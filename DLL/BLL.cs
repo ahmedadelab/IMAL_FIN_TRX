@@ -631,5 +631,213 @@ namespace IMAL_FIN_TRX.DLL
             return JsonConvert.SerializeObject(logresponse, Newtonsoft.Json.Formatting.Indented);
 
         }
-    }
+
+
+        public string ChequeTransaction(string transactionType, string CreditAdditionalRef, string DebitAdditionalRef, string transactionAmount, string currencyIso, string chequeNumber, string chequeDate, string useDate, string valueDate, string transactionStatus, string UserID, string Password, string ChannelName)
+        {
+
+            string soapResult = string.Empty;
+            string statusDesc = string.Empty;
+            string statusCode = string.Empty;
+            string TRXno = string.Empty;
+            string BranchNo = string.Empty;
+
+            List<ChequeReq> logrequest = new List<ChequeReq>();
+            List<ChequeRes> logresponse = new List<ChequeRes>();
+            string RequestID = "MW-CHEQUETRX-" + transactionType + "-" + DateTime.Now.ToString("ddMMyyyyHHmmssff");
+            string requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
+            try
+            {
+                logrequest.Add(new ChequeReq
+                {
+                    transactionType = transactionType,
+                    CreditAdditionalRef = CreditAdditionalRef,
+                    DebitAdditionalRef = DebitAdditionalRef,
+                    transactionAmount = transactionAmount,
+                    currencyIso = currencyIso,
+                    chequeNumber = chequeNumber,
+                    chequeDate = chequeDate,
+                    useDate = useDate,
+                    valueDate = valueDate,
+                    transactionStatus = transactionStatus,
+                    UserID = UserID,
+                    Password = "******",
+                    ChannelName = ChannelName,
+                });
+                string ClientRequest = JsonConvert.SerializeObject(logrequest, Newtonsoft.Json.Formatting.Indented);
+                DalCode.InsertLog("CHEQUETransfer", Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")), ClientRequest, "Pending", ChannelName, RequestID);
+                string status = CheckChannel(ChannelName, UserID, "CHEQUETransfer");
+                if (status == "Enabled")
+                {
+                    HttpWebRequest request = HTTPS.CreateChequeTransaction();
+                    XmlDocument soapEnvelopeXml = new XmlDocument();
+                    soapEnvelopeXml.LoadXml(@"<soapenv:Envelope xmlns:soapenv=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:cheq=""chequeTransactionWs"">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <cheq:createChequeDeposit>
+         <serviceContext>
+            <businessArea>Retail</businessArea>
+            <businessDomain>PaymentsOperationsManagement</businessDomain>
+            <operationName>createChequeDeposit</operationName>
+            <serviceDomain>ChequeTransaction</serviceDomain>
+            <serviceID>5101</serviceID>
+            <version>1.0</version>
+         </serviceContext>
+        <companyCode>1</companyCode>
+         <branchCode>133</branchCode>
+         <transactionType>23</transactionType>
+         <creditAccount>     
+            <additionalRef>" + CreditAdditionalRef + @"</additionalRef>
+         </creditAccount>         
+         <debitAccount>     
+            <additionalRef>" + DebitAdditionalRef + @"</additionalRef>
+         </debitAccount>         
+         <transactionAmount>" + transactionAmount + @"</transactionAmount>
+         <currencyIso>" + currencyIso + @"</currencyIso>
+         <chequeNumber>" + chequeNumber + @"</chequeNumber>
+         <chequeDate>" + chequeDate + @"</chequeDate>        
+         <useDate>" + useDate + @"</useDate>
+         <valueDate>" + valueDate + @"</valueDate>
+         <transactionStatus>" + transactionStatus + @"</transactionStatus>
+        <requestContext>
+            <coreRequestTimeStamp>" + requesterTimeStamp + @"</coreRequestTimeStamp>  
+            <requestID>" + RequestID + @"</requestID>      
+         </requestContext>         
+         <requesterContext>
+            <channelID>1</channelID>
+            <hashKey>1</hashKey>
+              <langId>EN</langId>
+            <password>" + Password + @"</password>
+            <requesterTimeStamp>" + requesterTimeStamp + @"</requesterTimeStamp>
+            <userID>" + UserID + @"</userID>
+         </requesterContext>
+         <vendorContext>
+            <license>Copyright 2018 Path Solutions. All Rights Reserved</license>
+            <providerCompanyName>Path Solutions</providerCompanyName>
+            <providerID>IMAL</providerID>
+         </vendorContext>
+      </cheq:createChequeDeposit>
+   </soapenv:Body>
+</soapenv:Envelope>
+");
+
+
+                    using (Stream stream = request.GetRequestStream())
+                    {
+                        soapEnvelopeXml.Save(stream);
+                    }
+                    using (WebResponse response = request.GetResponse())
+                    {
+
+                        using (StreamReader rd = new StreamReader(response.GetResponseStream()))
+                        {
+                            soapResult = rd.ReadToEnd();
+                            //Console.WriteLine(soapResult);
+                            var str = XElement.Parse(soapResult);
+
+                            XmlDocument xmlDoc = new XmlDocument();
+
+                            xmlDoc.LoadXml(soapResult);
+
+                            XmlNodeList elemStatusCode = xmlDoc.GetElementsByTagName("statusCode");
+                            statusCode = elemStatusCode[0]?.InnerXml;
+                            XmlNodeList elemStatusCodeDes = xmlDoc.GetElementsByTagName("statusDesc");
+                            statusDesc = elemStatusCodeDes[0]?.InnerXml;
+
+
+                            if (statusCode == "0")
+                            {
+
+
+                                XmlNodeList elBranchNo = xmlDoc.GetElementsByTagName("BranchNo");
+                                BranchNo = elBranchNo[0]?.InnerXml;
+                                XmlNodeList elTRXno = xmlDoc.GetElementsByTagName("TRXno");
+                                TRXno = elemStatusCodeDes[0]?.InnerXml;
+                                logresponse.Add(new ChequeRes
+                                {
+
+
+                                    statusCode = statusCode,
+                                    statusDesc = statusDesc,
+                                    TRXno = TRXno,
+                                    BranchNo = BranchNo
+
+
+                                });
+
+                            }
+                            else
+                            {
+                                if (statusCode != null)
+                                {
+                                    logresponse.Add(new ChequeRes
+                                    {
+                                        statusCode = statusCode,
+                                        statusDesc = statusDesc,
+
+                                    });
+                                }
+                                else
+                                {
+                                    XmlNodeList eerrorCode = xmlDoc.GetElementsByTagName("errorCode");
+                                    string errorCode = eerrorCode[0]?.InnerXml;
+                                    XmlNodeList eerrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
+                                    string errorDesc = eerrorDesc[0]?.InnerXml;
+                                    logresponse.Add(new ChequeRes
+                                    {
+                                        statusCode = errorCode,
+                                        statusDesc = errorDesc,
+
+                                    });
+                                }
+
+
+                            }
+
+                        }
+                    }
+
+                }
+                else
+                {
+                    logresponse.Add(new ChequeRes
+                    {
+
+
+                        statusCode = "-998",
+                        statusDesc = "Channel Not Authorized",
+
+                    });
+                }
+
+                string statuslog = "";
+                if (statusCode == "0")
+                {
+                    statuslog = "Success";
+                }
+                else
+                {
+                    statuslog = "Failed";
+                }
+                DalCode.UpdateLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), JsonConvert.SerializeObject(logresponse, Newtonsoft.Json.Formatting.Indented), statuslog, ChannelName, RequestID);
+
+
+
+            }
+            catch (Exception ex)
+            {
+                logresponse.Add(new ChequeRes
+                {
+
+
+                    statusCode = "-999",
+                    statusDesc = "Techical Error " + "\n" + ex.Message + "\n" + ex.InnerException,
+
+                });
+
+            }
+            return JsonConvert.SerializeObject(logresponse, Newtonsoft.Json.Formatting.Indented);
+        }
+    
+}
 }
