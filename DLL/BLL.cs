@@ -633,7 +633,7 @@ namespace IMAL_FIN_TRX.DLL
         }
 
 
-        public string ChequeTransaction(string transactionType, string CreditAdditionalRef, string DebitAdditionalRef, string transactionAmount, string currencyIso, string chequeNumber, string chequeDate, string useDate, string valueDate, string transactionStatus, string UserID, string Password, string ChannelName)
+        public string ChequeTransaction(string transactionType, string CreditAdditionalRef, string DebitAdditionalRef, string transactionAmount, string currencyIso, string chequeNumber, string chequeDate,  string valueDate, string UserID, string Password, string ChannelName)
         {
 
             string soapResult = string.Empty;
@@ -641,11 +641,12 @@ namespace IMAL_FIN_TRX.DLL
             string statusCode = string.Empty;
             string TRXno = string.Empty;
             string BranchNo = string.Empty;
-
+            
             List<ChequeReq> logrequest = new List<ChequeReq>();
             List<ChequeRes> logresponse = new List<ChequeRes>();
             string RequestID = "MW-CHEQUETRX-" + transactionType + "-" + DateTime.Now.ToString("ddMMyyyyHHmmssff");
             string requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
+            string TransactionDate = System.DateTime.Now.ToString("yyyy-MM-dd");
             try
             {
                 logrequest.Add(new ChequeReq
@@ -657,9 +658,8 @@ namespace IMAL_FIN_TRX.DLL
                     currencyIso = currencyIso,
                     chequeNumber = chequeNumber,
                     chequeDate = chequeDate,
-                    useDate = useDate,
-                    valueDate = valueDate,
-                    transactionStatus = transactionStatus,
+                    transactionDate =TransactionDate,
+                    valueDate = valueDate,                   
                     UserID = UserID,
                     Password = "******",
                     ChannelName = ChannelName,
@@ -684,8 +684,8 @@ namespace IMAL_FIN_TRX.DLL
             <version>1.0</version>
          </serviceContext>
         <companyCode>1</companyCode>
-         <branchCode>133</branchCode>
-         <transactionType>23</transactionType>
+         <branchCode>5599</branchCode>
+         <transactionType>"+ transactionType + @"</transactionType>
          <creditAccount>     
             <additionalRef>" + CreditAdditionalRef + @"</additionalRef>
          </creditAccount>         
@@ -696,9 +696,9 @@ namespace IMAL_FIN_TRX.DLL
          <currencyIso>" + currencyIso + @"</currencyIso>
          <chequeNumber>" + chequeNumber + @"</chequeNumber>
          <chequeDate>" + chequeDate + @"</chequeDate>        
-         <useDate>" + useDate + @"</useDate>
+         <transactionDate>" + TransactionDate + @"</transactionDate>
          <valueDate>" + valueDate + @"</valueDate>
-         <transactionStatus>" + transactionStatus + @"</transactionStatus>
+         <transactionStatus>1</transactionStatus>
         <requestContext>
             <coreRequestTimeStamp>" + requesterTimeStamp + @"</coreRequestTimeStamp>  
             <requestID>" + RequestID + @"</requestID>      
@@ -755,14 +755,10 @@ namespace IMAL_FIN_TRX.DLL
                                 TRXno = elemStatusCodeDes[0]?.InnerXml;
                                 logresponse.Add(new ChequeRes
                                 {
-
-
                                     statusCode = statusCode,
                                     statusDesc = statusDesc,
                                     TRXno = TRXno,
                                     BranchNo = BranchNo
-
-
                                 });
 
                             }

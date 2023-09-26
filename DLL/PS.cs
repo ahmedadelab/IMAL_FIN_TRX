@@ -23,10 +23,8 @@
             public string? currencyIso { get; set; }
             public string? chequeNumber { get; set; }
             public string? chequeDate { get; set; }
-            public string? useDate { get; set; }
             public string? transactionDate { get; set; }
             public string? valueDate { get; set; }
-            public string? transactionStatus { get; set; }
             public string? UserID { get; set; }
             public string? Password { get; set; }
             public string? ChannelName { get; set; }
