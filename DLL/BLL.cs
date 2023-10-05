@@ -41,13 +41,13 @@ namespace IMAL_FIN_TRX.DLL
 
         public string ReverseTrx(string BrancheCode, string TransactionNumber, string reason, string userID, string password, string ChannelName)
         {
-            string soapResult = string.Empty;
-            string StatusDesc = string.Empty;
-            string StatusCode = string.Empty;
-            string transactionNum = string.Empty;
-            string branchcode = string.Empty;
+            string? soapResult = string.Empty;
+            string? StatusDesc = string.Empty;
+            string? StatusCode = string.Empty;
+            string? transactionNum = string.Empty;
+            string? branchcode = string.Empty;
             List<ReqReverseTransaction> logrequest1 = new List<ReqReverseTransaction>();
-            List<RespReverseTransaction> logresponse1 = new List<RespReverseTransaction>();
+            List<ReverseTransactionResponse> logresponse1 = new List<ReverseTransactionResponse>();
             string RequestID = "MW-RVRX-" + TransactionNumber+"-"+"-"+ BrancheCode + DateTime.Now.ToString("ddMMyyyyHHmmssff");
             string requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
             try
@@ -142,12 +142,13 @@ namespace IMAL_FIN_TRX.DLL
                                 transactionNum = elemtransactionNumber[0]?.InnerXml;
 
                                 XmlNodeList elembranchCode = xmlDoc.GetElementsByTagName("branchCode");
-                                string branchCode = elembranchCode[0].InnerXml;
+                                string? branchCode = elembranchCode[0]?.InnerXml;
 
-                                logresponse1.Add(new RespReverseTransaction
+                                logresponse1.Add(new ReverseTransactionResponse
                                 {
                                     transactionNumber = transactionNum,
                                     branchCode = branchCode,
+                                    IMALRequestID = RequestID,
                                     StatusCode = StatusCode,
                                     StatusDesc = StatusDesc,
 
@@ -162,10 +163,11 @@ namespace IMAL_FIN_TRX.DLL
                                     XmlNodeList elemerrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
                                     StatusDesc = elemerrorDesc[0]?.InnerXml;
                                 }
-                                logresponse1.Add(new RespReverseTransaction
+                                logresponse1.Add(new ReverseTransactionResponse
                                 {
                                     branchCode = BrancheCode,
                                     transactionNumber = TransactionNumber,
+                                    IMALRequestID = RequestID,
                                     StatusCode = StatusCode,
                                     StatusDesc = StatusDesc,
 
@@ -181,7 +183,7 @@ namespace IMAL_FIN_TRX.DLL
                 }
                 else
                 {
-                    logresponse1.Add(new RespReverseTransaction
+                    logresponse1.Add(new ReverseTransactionResponse
                     {
 
 
@@ -207,7 +209,7 @@ namespace IMAL_FIN_TRX.DLL
             }
             catch (Exception ex)
             {
-                logresponse1.Add(new RespReverseTransaction
+                logresponse1.Add(new ReverseTransactionResponse
                 {
 
 
@@ -225,13 +227,13 @@ namespace IMAL_FIN_TRX.DLL
         public string CreatTrx(string TransactionType, string ToAdditionalRef, string fromAdditionalRef, string TransactionPurpose, string TransactionAmount, string Currency, string TransactionDate,
             string valueDate, string userID, string password, string ChannelName,string TransferDesc)
         {
-            string soapResult = string.Empty;
-            string StatusDesc = string.Empty;
-            string StatusCode = string.Empty;
+            string? soapResult = string.Empty;
+            string? StatusDesc = string.Empty;
+            string? StatusCode = string.Empty;
             List<ReqCreateTransfer> logrequest = new List<ReqCreateTransfer>();
-            List<RespCreateTransfer> logresponse = new List<RespCreateTransfer>();
-            string RequestID = "MW-CTRX-" + TransactionType + "-" + DateTime.Now.ToString("ddMMyyyyHHmmssff");
-            string requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
+            List<CreateTransferResponse> logresponse = new List<CreateTransferResponse>();
+            string? RequestID = "MW-CTRX-" + TransactionType + "-" + DateTime.Now.ToString("ddMMyyyyHHmmssff");
+            string? requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
             try
             {
                 logrequest.Add(new ReqCreateTransfer
@@ -337,12 +339,12 @@ namespace IMAL_FIN_TRX.DLL
                             {
 
                                 XmlNodeList elemtransactionNumber = xmlDoc.GetElementsByTagName("transactionNumber");
-                          string transactionNumber = elemtransactionNumber[0].InnerXml;
+                          string? transactionNumber = elemtransactionNumber[0]?.InnerXml;
 
                                 XmlNodeList elembranchCode = xmlDoc.GetElementsByTagName("branchCode");
-                                string branchCode = elembranchCode[0].InnerXml;
+                                string? branchCode = elembranchCode[0]?.InnerXml;
 
-                                logresponse.Add(new RespCreateTransfer
+                                logresponse.Add(new CreateTransferResponse
                                 {
                                     transactionNumber = transactionNumber,
                                     branchCode = branchCode,
@@ -361,7 +363,7 @@ namespace IMAL_FIN_TRX.DLL
                                     XmlNodeList elemerrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
                                     StatusDesc = elemerrorDesc[0]?.InnerXml;
                                 }
-                                logresponse.Add(new RespCreateTransfer
+                                logresponse.Add(new CreateTransferResponse
                                 {
 
 
@@ -380,7 +382,7 @@ namespace IMAL_FIN_TRX.DLL
                 }
                 else
                 {
-                    logresponse.Add(new RespCreateTransfer
+                    logresponse.Add(new CreateTransferResponse
                     {
 
 
@@ -406,7 +408,7 @@ namespace IMAL_FIN_TRX.DLL
             }
             catch (Exception ex)
             {
-                logresponse.Add(new RespCreateTransfer
+                logresponse.Add(new CreateTransferResponse
                 {
 
 
@@ -423,11 +425,11 @@ namespace IMAL_FIN_TRX.DLL
         public string CreatTrxCharge(string TransactionType, string ToAdditionalRef, string fromAdditionalRef, string TransactionPurpose, string TransactionAmount, string Currency, string TransactionDate,
           string valueDate, string userID, string password, string ChannelName, string TransferDesc,string ChargeCode1,string ChargeCodeAmount1,string ChargeCode2,string ChargeCodeAmount2)
         {
-            string soapResult = string.Empty;
-            string StatusDesc = string.Empty;
-            string StatusCode = string.Empty;
+            string? soapResult = string.Empty;
+            string? StatusDesc = string.Empty;
+            string? StatusCode = string.Empty;
             List<ReqCreateTransfer> logrequest = new List<ReqCreateTransfer>();
-            List<RespCreateTransfer> logresponse = new List<RespCreateTransfer>();
+            List<CreateTransferResponse> logresponse = new List<CreateTransferResponse>();
             string RequestID = "MW-CTRXCharge-" + TransactionType + "-" + DateTime.Now.ToString("ddMMyyyyHHmmssff");
             string requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
             try
@@ -549,12 +551,12 @@ namespace IMAL_FIN_TRX.DLL
                             {
 
                                 XmlNodeList elemtransactionNumber = xmlDoc.GetElementsByTagName("transactionNumber");
-                                string transactionNumber = elemtransactionNumber[0].InnerXml;
+                                string? transactionNumber = elemtransactionNumber[0]?.InnerXml;
 
                                 XmlNodeList elembranchCode = xmlDoc.GetElementsByTagName("branchCode");
-                                string branchCode = elembranchCode[0].InnerXml;
+                                string? branchCode = elembranchCode[0]?.InnerXml;
 
-                                logresponse.Add(new RespCreateTransfer
+                                logresponse.Add(new CreateTransferResponse
                                 {
                                     transactionNumber = transactionNumber,
                                     branchCode = branchCode,
@@ -573,7 +575,7 @@ namespace IMAL_FIN_TRX.DLL
                                     XmlNodeList elemerrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
                                     StatusDesc = elemerrorDesc[0]?.InnerXml;
                                 }
-                                logresponse.Add(new RespCreateTransfer
+                                logresponse.Add(new CreateTransferResponse
                                 {
 
 
@@ -592,7 +594,7 @@ namespace IMAL_FIN_TRX.DLL
                 }
                 else
                 {
-                    logresponse.Add(new RespCreateTransfer
+                    logresponse.Add(new CreateTransferResponse
                     {
 
 
@@ -618,7 +620,7 @@ namespace IMAL_FIN_TRX.DLL
             }
             catch (Exception ex)
             {
-                logresponse.Add(new RespCreateTransfer
+                logresponse.Add(new CreateTransferResponse
                 {
 
 
@@ -636,14 +638,14 @@ namespace IMAL_FIN_TRX.DLL
         public string ChequeTransaction(string transactionType, string CreditAdditionalRef, string DebitAdditionalRef, string transactionAmount, string currencyIso, string chequeNumber, string chequeDate,  string valueDate, string UserID, string Password, string ChannelName)
         {
 
-            string soapResult = string.Empty;
-            string statusDesc = string.Empty;
-            string statusCode = string.Empty;
-            string TRXno = string.Empty;
-            string BranchNo = string.Empty;
+            string? soapResult = string.Empty;
+            string? statusDesc = string.Empty;
+            string? statusCode = string.Empty;
+            string? TRXno = string.Empty;
+            string? BranchNo = string.Empty;
             
             List<ChequeReq> logrequest = new List<ChequeReq>();
-            List<ChequeRes> logresponse = new List<ChequeRes>();
+            List<ChequeTRXResponse> logresponse = new List<ChequeTRXResponse>();
             string RequestID = "MW-CHEQUETRX-" + transactionType + "-" + DateTime.Now.ToString("ddMMyyyyHHmmssff");
             string requesterTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
             string TransactionDate = System.DateTime.Now.ToString("yyyy-MM-dd");
@@ -753,7 +755,7 @@ namespace IMAL_FIN_TRX.DLL
                                 BranchNo = elBranchNo[0]?.InnerXml;
                                 XmlNodeList elTRXno = xmlDoc.GetElementsByTagName("TRXno");
                                 TRXno = elemStatusCodeDes[0]?.InnerXml;
-                                logresponse.Add(new ChequeRes
+                                logresponse.Add(new ChequeTRXResponse
                                 {
                                     statusCode = statusCode,
                                     statusDesc = statusDesc,
@@ -766,7 +768,7 @@ namespace IMAL_FIN_TRX.DLL
                             {
                                 if (statusCode != null)
                                 {
-                                    logresponse.Add(new ChequeRes
+                                    logresponse.Add(new ChequeTRXResponse
                                     {
                                         statusCode = statusCode,
                                         statusDesc = statusDesc,
@@ -776,10 +778,10 @@ namespace IMAL_FIN_TRX.DLL
                                 else
                                 {
                                     XmlNodeList eerrorCode = xmlDoc.GetElementsByTagName("errorCode");
-                                    string errorCode = eerrorCode[0]?.InnerXml;
+                                    string? errorCode = eerrorCode[0]?.InnerXml;
                                     XmlNodeList eerrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
-                                    string errorDesc = eerrorDesc[0]?.InnerXml;
-                                    logresponse.Add(new ChequeRes
+                                    string? errorDesc = eerrorDesc[0]?.InnerXml;
+                                    logresponse.Add(new ChequeTRXResponse
                                     {
                                         statusCode = errorCode,
                                         statusDesc = errorDesc,
@@ -796,7 +798,7 @@ namespace IMAL_FIN_TRX.DLL
                 }
                 else
                 {
-                    logresponse.Add(new ChequeRes
+                    logresponse.Add(new ChequeTRXResponse
                     {
 
 
@@ -822,7 +824,7 @@ namespace IMAL_FIN_TRX.DLL
             }
             catch (Exception ex)
             {
-                logresponse.Add(new ChequeRes
+                logresponse.Add(new ChequeTRXResponse
                 {
 
 

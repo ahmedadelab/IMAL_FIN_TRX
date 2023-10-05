@@ -28,6 +28,7 @@ namespace IMAL_FIN_TRX.DLL
             webRequest.ContentType = "text/xml;charset=\"utf-8\"";
             webRequest.Accept = "text/xml";
             webRequest.Method = "POST";
+            webRequest.KeepAlive= false;
             return webRequest;
         }
 
@@ -41,6 +42,7 @@ namespace IMAL_FIN_TRX.DLL
             webRequest.ContentType = "text/xml;charset=\"utf-8\"";
             webRequest.Accept = "text/xml";
             webRequest.Method = "POST";
+            webRequest.KeepAlive = false;
             return webRequest;
         }
     }

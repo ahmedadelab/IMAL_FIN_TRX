@@ -1,5 +1,7 @@
 ﻿using IMAL_FIN_TRX.DLL;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mime;
+using static IMAL_FIN_TRX.DLL.PS;
 
 namespace IMAL_FIN_TRX.Controllers
 {
@@ -8,9 +10,12 @@ namespace IMAL_FIN_TRX.Controllers
         BLL dllCode = new BLL();
 
         [HttpPost("CChequeTrx")]
-        public ActionResult<string> Create([FromBody] SChequeTRX x)
+        [Consumes(MediaTypeNames.Application.Json)]
+        [Produces(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(typeof(ChequeTRXResponse), 200)]
+        public ActionResult<string> Create([FromBody] ChequeTRXRequest x)
         {
-            return (dllCode.ChequeTransaction(
+            return Ok(dllCode.ChequeTransaction(
             x.transactionType,
             x.CreditAdditionalRef,
             x.DebitAdditionalRef,
