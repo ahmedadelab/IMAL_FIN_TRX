@@ -18,7 +18,7 @@ namespace IMAL_FIN_TRX.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
       //  [Produces(MediaTypeNames.Application.Json)]
         [HttpPost]
-        [ProducesResponseType(typeof(CreateTransferResponse), 200)]
+      //  [ProducesResponseType(typeof(CreateTransferResponse), 200)]
         public ActionResult<string> Create([FromBody] IMALTRXRequest x)
         {
             return Ok(dllCode.CreatTrx(x.TransactionType,x.ToAdditionalRef,x.fromAdditionalRef,x.TransactionPurpose,x.TransactionAmount,x.Currency,x.TransactionDate,x.ValueDate,x.UserID,x.Password,x.ChannelName,x.TransferDesc));
