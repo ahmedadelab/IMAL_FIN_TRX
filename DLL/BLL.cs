@@ -222,6 +222,308 @@ namespace IMAL_FIN_TRX.DLL
             return JsonConvert.SerializeObject(logresponse1, Newtonsoft.Json.Formatting.Indented);
 
         }
+        public string IMALCreateJVTicket(SIMALJVTicket.JVTicketRequest ListRequest, string UserID, string Password, string ChannelName)
+        {
+            string accGl = string.Empty;
+            string branch = string.Empty;
+            string cif = string.Empty;
+            string currency = string.Empty;
+            string serialNo = string.Empty;
+            string batchRef = string.Empty;
+            string cvAmount = string.Empty;
+            string description = string.Empty;
+            string jvTypeNumber = string.Empty;
+            string lineNo = string.Empty;
+            string processed = string.Empty;
+            string innerStatusCode = string.Empty;
+            string innerStatusDesc = string.Empty;
+            string transactionCode = string.Empty;
+            string transactionDate = string.Empty;
+            string transactionTypeCode = string.Empty;
+            string valueDate = string.Empty;
+            string statusLog = string.Empty;
+            string statusCode = string.Empty;
+            string statusDesc = string.Empty;
+            string soapResult = string.Empty;
+            List<SIMALJVTicket.JVTicketRequest> jvTicketRequests = new List<SIMALJVTicket.JVTicketRequest>();
+            List<SIMALJVTicket.JVTicketResponse> jVTicketResponses = new List<SIMALJVTicket.JVTicketResponse>();
+            String requestID = "MW-JVCreate" + UserID + "-" + DateTime.Now.ToString("ddMMyyyyHHmmssff");
+            string requestTimeStamp = System.DateTime.Now.ToString("yyyy-MM-dd" + "T" + "HH:mm:ss");
+
+            try
+            {
+                List<SIMALJVTicket.JVTicketList> jvTicketLists = ListRequest.JVTicketLists;
+
+                jvTicketRequests.Add(new SIMALJVTicket.JVTicketRequest
+                {
+                    JVTicketLists = jvTicketLists,
+                    UserID = UserID,
+                    Password = "******",
+                    ChannelName = ChannelName,
+                });
+
+                string clientRequest = JsonConvert.SerializeObject(jvTicketRequests, Newtonsoft.Json.Formatting.Indented);
+                DalCode.InsertLog("CreateJvTicket", Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")), clientRequest, "Pending", ChannelName, requestID);
+                string status = CheckChannel(ChannelName, UserID, "Statment");
+                if (status == "Enabled")
+                {
+                    HttpWebRequest request = HTTPS.CreateJVTicketClient();
+                    XmlDocument soapEnvelopeXml = new XmlDocument();
+                    soapEnvelopeXml.LoadXml(@"<soapenv:Envelope xmlns:soapenv=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:jour=""journalVoucharWs"">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <jour:createJvTicket>
+         <serviceContext>
+            <businessArea>Accounting</businessArea>
+            <businessDomain>transactions</businessDomain>
+            <operationName>createJvTicket</operationName>
+            <serviceDomain>JournalVouchar</serviceDomain>
+            <serviceID>6701</serviceID>
+            <version>1.0</version>
+         </serviceContext>
+         <companyCode>1</companyCode>
+         <branchCode>5599</branchCode>
+         <approveCreatedJV>1</approveCreatedJV>
+         <jvTicketList>
+                     </jvTicketList>
+         <useDate>1</useDate>
+         <requestContext>
+             <requestID>" + requestID + @"</requestID>
+            <coreRequestTimeStamp>" + requestTimeStamp + @"</coreRequestTimeStamp> 
+         </requestContext>
+         <requesterContext>
+            <channelID>1</channelID>
+            <hashKey>1</hashKey>
+            <langId>EN</langId>
+            <password>" + Password + @"</password>
+            <requesterTimeStamp>" + requestTimeStamp + @"</requesterTimeStamp>
+            <userID>" + UserID + @"</userID>
+         </requesterContext>
+         <vendorContext>
+            <license>Copyright 2018 Path Solutions. All Rights Reserved</license>
+            <providerCompanyName>Path Solutions</providerCompanyName>
+            <providerID>IMAL</providerID>
+         </vendorContext>
+      </jour:createJvTicket>
+   </soapenv:Body>
+</soapenv:Envelope>");
+                    XmlElement jvTicketListElements = soapEnvelopeXml.DocumentElement;
+                    XmlNode parentNode = soapEnvelopeXml.SelectSingleNode("//jvTicketList");
+                    foreach (var jvTicketDetailedItems in jvTicketLists)
+                    {
+                        XmlElement jvTicketElement = soapEnvelopeXml.CreateElement("jvTicket");
+
+                        XmlElement lineNoElement = soapEnvelopeXml.CreateElement("lineNumber");
+                        lineNoElement.InnerText = jvTicketDetailedItems.LineNo;
+                        jvTicketElement.AppendChild(lineNoElement);
+
+                        XmlElement accountListElement = soapEnvelopeXml.CreateElement("account");
+
+                        XmlElement branchCodeElement = soapEnvelopeXml.CreateElement("branch");
+                        branchCodeElement.InnerText = jvTicketDetailedItems.BranchCode;
+                        accountListElement.AppendChild(branchCodeElement);
+
+                        XmlElement currencyElement = soapEnvelopeXml.CreateElement("currency");
+                        currencyElement.InnerText = jvTicketDetailedItems.Currency;
+                        accountListElement.AppendChild(currencyElement);
+
+                        XmlElement accGlElement = soapEnvelopeXml.CreateElement("accGl");
+                        accGlElement.InnerText = jvTicketDetailedItems.AccGL;
+                        accountListElement.AppendChild(accGlElement);
+
+                        XmlElement serialNoElement = soapEnvelopeXml.CreateElement("serialNo");
+                        serialNoElement.InnerText = jvTicketDetailedItems.SerialNo;
+                        accountListElement.AppendChild(serialNoElement);
+
+                        XmlElement cifEelement = soapEnvelopeXml.CreateElement("cif");
+                        cifEelement.InnerText = jvTicketDetailedItems.Cif;
+                        accountListElement.AppendChild(cifEelement);
+
+
+                        jvTicketElement.AppendChild(accountListElement);
+
+                        if (jvTicketDetailedItems.Currency == "818")
+                        {
+
+                            XmlElement cvAmountElement = soapEnvelopeXml.CreateElement("cvAmount");
+                            cvAmountElement.InnerText = jvTicketDetailedItems.CVAmount;
+                            jvTicketElement.AppendChild(cvAmountElement);
+                        }
+                        else
+                        {
+                            XmlElement cvAmountElement = soapEnvelopeXml.CreateElement("cvAmount");
+                            cvAmountElement.InnerText = jvTicketDetailedItems.CVAmount;
+                            jvTicketElement.AppendChild(cvAmountElement);
+
+                            XmlElement fcAmountElement = soapEnvelopeXml.CreateElement("fcAmount");
+                            fcAmountElement.InnerText = jvTicketDetailedItems.FCAmount;
+                            jvTicketElement.AppendChild(fcAmountElement);
+
+                            XmlElement exchangeElement = soapEnvelopeXml.CreateElement("exchangeRate");
+                            exchangeElement.InnerText = jvTicketDetailedItems.ExchangeRate;
+                            jvTicketElement.AppendChild(exchangeElement);
+
+                        }
+                        XmlElement jvDescriptionElement = soapEnvelopeXml.CreateElement("jvDescription");
+                        jvDescriptionElement.InnerText = jvTicketDetailedItems.JVDescription;
+                        jvTicketElement.AppendChild(jvDescriptionElement);
+
+                        XmlElement transactionTypeCodeElement = soapEnvelopeXml.CreateElement("transactionTypeCode");
+                        transactionTypeCodeElement.InnerText = jvTicketDetailedItems.TransactionTypeCode;
+                        jvTicketElement.AppendChild(transactionTypeCodeElement);
+
+                        XmlElement jvTypeNoElement = soapEnvelopeXml.CreateElement("jvTypeNumber");
+                        jvTypeNoElement.InnerText = jvTicketDetailedItems.JVTypeNumber;
+                        jvTicketElement.AppendChild(jvTypeNoElement);
+
+                        XmlElement valueDateElement = soapEnvelopeXml.CreateElement("valueDate");
+                        valueDateElement.InnerText = jvTicketDetailedItems.ValueDate;
+                        jvTicketElement.AppendChild(valueDateElement);
+
+                        XmlElement transactionDateElement = soapEnvelopeXml.CreateElement("transactionDate");
+                        transactionDateElement.InnerText = jvTicketDetailedItems.TransactionDate;
+                        jvTicketElement.AppendChild(valueDateElement);
+
+                        XmlElement descriptionElement = soapEnvelopeXml.CreateElement("description");
+                        descriptionElement.InnerText = jvTicketDetailedItems.Description;
+                        jvTicketElement.AppendChild(descriptionElement);
+
+                        parentNode.AppendChild(jvTicketElement);
+                    }
+
+                    using (Stream stream = request.GetRequestStream())
+                    {
+                        soapEnvelopeXml.Save(stream);
+                    }
+
+                    //Console.WriteLine(soapEnvelopeXml.ToString());
+
+                    using (WebResponse response = request.GetResponse())
+                    {
+                        using (StreamReader rd = new StreamReader(response.GetResponseStream()))
+                        {
+                            soapResult = rd.ReadToEnd();
+                            var str = XElement.Parse(soapResult);
+                            XmlDocument xmlDoc = new XmlDocument();
+                            xmlDoc.LoadXml(soapResult);
+                            XmlNodeList elemStatusCode = xmlDoc.GetElementsByTagName("statusCode");
+                            statusCode = elemStatusCode[0]?.InnerXml;
+                            XmlNodeList elemStatusDesc = xmlDoc.GetElementsByTagName("statusDesc");
+                            statusDesc = elemStatusCode[0]?.InnerXml;
+                            if (statusCode == "0")
+                            {
+                                XmlNodeList elemJVTicketListResponse = xmlDoc.GetElementsByTagName("jvTicketResponse");
+                                foreach (XmlNode jvTicketListResponses in elemJVTicketListResponse)
+                                {
+                                    accGl = jvTicketListResponses.SelectSingleNode("account/accGl")?.InnerXml;
+                                    branch = jvTicketListResponses.SelectSingleNode("account/branch")?.InnerXml;
+                                    cif = jvTicketListResponses.SelectSingleNode("account/cif")?.InnerXml;
+                                    currency = jvTicketListResponses.SelectSingleNode("account/currency")?.InnerXml;
+                                    serialNo = jvTicketListResponses.SelectSingleNode("account/serialNo")?.InnerXml;
+                                    batchRef = jvTicketListResponses.SelectSingleNode("batchReference")?.InnerXml;
+                                    cvAmount = jvTicketListResponses.SelectSingleNode("cvAmount")?.InnerXml;
+                                    description = jvTicketListResponses.SelectSingleNode("description")?.InnerXml;
+                                    jvTypeNumber = jvTicketListResponses.SelectSingleNode("jvTypeNumber")?.InnerXml;
+                                    lineNo = jvTicketListResponses.SelectSingleNode("lineNumber")?.InnerXml;
+                                    processed = jvTicketListResponses.SelectSingleNode("lineNumber")?.InnerXml;
+                                    innerStatusCode = jvTicketListResponses.SelectSingleNode("statusCode")?.InnerXml;
+                                    innerStatusDesc = jvTicketListResponses.SelectSingleNode("statusDesc")?.InnerXml;
+                                    transactionCode = jvTicketListResponses.SelectSingleNode("transactionCode")?.InnerXml;
+                                    transactionDate = jvTicketListResponses.SelectSingleNode("transactionDate")?.InnerXml;
+                                    transactionTypeCode = jvTicketListResponses.SelectSingleNode("transactionTypeCode")?.InnerXml;
+                                    valueDate = jvTicketListResponses.SelectSingleNode("valueDate")?.InnerXml;
+
+                                    jVTicketResponses.Add(new SIMALJVTicket.JVTicketResponse
+                                    {
+                                        AccGL = accGl,
+                                        Branch = branch,
+                                        Cif = cif,
+                                        Currency = currency,
+                                        SerialNo = serialNo,
+                                        BatchRef = batchRef,
+                                        CVAmount = cvAmount,
+                                        Description = description,
+                                        JVTypeNo = jvTypeNumber,
+                                        LineNo = lineNo,
+                                        Processed = processed,
+                                        InnerStatusCode = innerStatusCode,
+                                        InnerStatusDesc = innerStatusDesc,
+                                        TransactionCode = transactionCode,
+                                        TransactionDate = transactionDate,
+                                        TransactionTypeCode = transactionTypeCode,
+                                        ValueDate = valueDate,
+                                        StatusCode = statusCode,
+                                        StatusDesc = statusDesc,
+
+                                    });
+
+
+                                }
+
+                            }
+                            else
+                            {
+                                if (statusCode != null)
+                                {
+                                    XmlNodeList elemJVTicketListResponse = xmlDoc.GetElementsByTagName("jvTicketResponse");
+                                    foreach (XmlNode jvTicketListResponses in elemJVTicketListResponse)
+                                    {
+                                        innerStatusCode = jvTicketListResponses.SelectSingleNode("statusCode")?.InnerXml;
+                                        innerStatusDesc = jvTicketListResponses.SelectSingleNode("statusDesc")?.InnerXml;
+                                        jVTicketResponses.Add(new SIMALJVTicket.JVTicketResponse
+                                        {
+                                            InnerStatusCode = innerStatusCode,
+                                            InnerStatusDesc = innerStatusDesc,
+                                        });
+
+
+                                    }
+                                }
+                                else
+                                {
+                                    XmlNodeList elemErrorCode = xmlDoc.GetElementsByTagName("errorCode");
+                                    string errorCode = elemErrorCode[0]?.InnerXml;
+                                    XmlNodeList elemErrorDesc = xmlDoc.GetElementsByTagName("errorDesc");
+                                    string errorDesc = elemErrorCode[0]?.InnerXml;
+                                    jVTicketResponses.Add(new SIMALJVTicket.JVTicketResponse
+                                    {
+                                        StatusCode = errorCode,
+                                        StatusDesc = errorDesc,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    jVTicketResponses.Add(new SIMALJVTicket.JVTicketResponse
+                    {
+                        StatusCode = "-998",
+                        StatusDesc = "Channel Not Authorized",
+                    });
+                }
+                if (statusCode == "0")
+                {
+                    statusLog = "Success";
+                }
+                else
+                {
+                    statusLog = "Failed";
+                }
+
+                DalCode.UpdateLog(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), clientRequest, statusLog, ChannelName, requestID);
+            }
+            catch (Exception ex)
+            {
+                jVTicketResponses.Add(new SIMALJVTicket.JVTicketResponse
+                {
+                    StatusCode = " - 999",
+                    StatusDesc = "Techical Error " + "\n" + ex.Message + "\n" + ex.InnerException,
+                });
+            }
+            return JsonConvert.SerializeObject(jVTicketResponses, Newtonsoft.Json.Formatting.Indented);
+        }
 
 
         public string CreatTrx(string TransactionType, string ToAdditionalRef, string fromAdditionalRef, string TransactionPurpose, string TransactionAmount, string Currency, string TransactionDate,
