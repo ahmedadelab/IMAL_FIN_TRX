@@ -42,9 +42,9 @@
         public class JVTicketRequest
         {
             public List<JVTicketList> JVTicketLists { get; set; }
-            public string? UserID { get; set; }
-            public string? Password { get; set; }
-            public string? ChannelName { get; set; }
+            public string UserID { get; set; }
+            public string Password { get; set; }
+            public string ChannelName { get; set; }
 
             public JVTicketRequest()
             {
