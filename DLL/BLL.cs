@@ -217,6 +217,7 @@ namespace IMAL_FIN_TRX.DLL
                     StatusDesc = "Techical Error " + "\n" + ex.Message + "\n" + ex.InnerException,
 
                 });
+                Console.WriteLine(DateTime.Now + " " + StatusDesc);
 
             }
             return JsonConvert.SerializeObject(logresponse1, Newtonsoft.Json.Formatting.Indented);
@@ -521,6 +522,7 @@ namespace IMAL_FIN_TRX.DLL
                     StatusCode = " - 999",
                     StatusDesc = "Techical Error " + "\n" + ex.Message + "\n" + ex.InnerException,
                 });
+                Console.WriteLine(statusDesc);
             }
             return JsonConvert.SerializeObject(jVTicketResponses, Newtonsoft.Json.Formatting.Indented);
         }
@@ -718,6 +720,7 @@ namespace IMAL_FIN_TRX.DLL
                     StatusDesc = "Techical Error "+"\n"+ex.Message+"\n"+ex.InnerException,
 
                 });
+                Console.WriteLine(DateTime.Now +" "+ StatusDesc);
 
             }
             return JsonConvert.SerializeObject(logresponse, Newtonsoft.Json.Formatting.Indented);
@@ -931,6 +934,8 @@ namespace IMAL_FIN_TRX.DLL
 
                 });
 
+                Console.WriteLine(DateTime.Now + " " + StatusDesc);
+
             }
             return JsonConvert.SerializeObject(logresponse, Newtonsoft.Json.Formatting.Indented);
 
@@ -1134,6 +1139,8 @@ namespace IMAL_FIN_TRX.DLL
                     statusDesc = "Techical Error " + "\n" + ex.Message + "\n" + ex.InnerException,
 
                 });
+
+                Console.WriteLine(DateTime.Now + " " + statusDesc);
 
             }
             return JsonConvert.SerializeObject(logresponse, Newtonsoft.Json.Formatting.Indented);
