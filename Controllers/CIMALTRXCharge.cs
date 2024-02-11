@@ -10,7 +10,7 @@ namespace IMAL_FIN_TRX.Controllers
         BLL dllCode = new BLL();
 
         [Consumes(MediaTypeNames.Application.Json)]
-        [Produces(MediaTypeNames.Application.Json)]
+
         [ProducesResponseType(typeof(CreateTransferResponse), 200)]
         [HttpPost("CIMALTRXCharge")]
         public ActionResult<string> Create([FromBody] IMALTRXChargeRequest x)

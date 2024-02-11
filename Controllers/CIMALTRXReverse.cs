@@ -10,7 +10,7 @@ namespace IMAL_FIN_TRX.Controllers
         BLL dllCode = new BLL();
 
         [Consumes(MediaTypeNames.Application.Json)]
-        [Produces(MediaTypeNames.Application.Json)]
+   
         [ProducesResponseType(typeof(ReverseTransactionResponse), 200)]
         [HttpPost("CIMALTRXReverse")]
         public ActionResult<string> Reverse([FromBody] IMALTRXRevRequest x)
