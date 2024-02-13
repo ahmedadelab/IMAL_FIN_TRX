@@ -11,7 +11,7 @@ namespace IMAL_FIN_TRX.Controllers
 
         [Consumes(MediaTypeNames.Application.Json)]
 
-        [ProducesResponseType(typeof(CreateTransferResponse), 200)]
+     ///   [ProducesResponseType(typeof(CreateTransferResponse), 200)]
         [HttpPost("CIMALTRXCharge")]
         public ActionResult<string> Create([FromBody] IMALTRXChargeRequest x)
         {
